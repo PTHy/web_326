@@ -197,11 +197,27 @@ function drawUser(user) {
             <div class="username" style="width: 350px;">${user.username}</div>
             <div class="email" style="width: 350px;">${user.email}</div>
             <div class="profileImage" style="width: 350px; overflow: hidden; text-overflow: ellipsis">${user.profileImage}</div>
+            <div class="modifyMode"><button onclick="deleteUser(${user.id})">삭제</button></div>
             <input type="file" id="upload-file${user.id}">
             <div><button onclick="changeProfilePhoto(${user.id})">프로필 사진 업로드</button></div>
         </div> 
         `
     )
+}
+
+async function deleteUser(id) {
+    try {
+        await $.ajax({
+            url: `user/${id}`,
+            type: 'delete',
+            success : (result) => {
+                if (result === true)
+                    $(`#user${id}`).remove();
+            }
+        });
+    } catch (error) {
+        console.log(JSON.stringify(error));
+    }
 }
 
 async function getUsers() {
