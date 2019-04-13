@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DGSW SNS</title>
+    <script type="text/javascript" src="script.js"></script>
+    <link rel="stylesheet" href="./style.css">
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+</head>
+<body>
+    <header>DGSW SNS</header>
+    <section>
+        <div id="contents">
+            <div id="new-comment-btn" onclick="openCommentDialog()">새 글 추가</div>
+            <div id="comments">
+                <div>
+                 <img class="comment-image" src="public/default.jpg" alt="">
+                    <div class="user-name">작성자</div>
+                    <div class="created">작성 일자</div>
+                    <div class="content">내용</div>
+                    <div>
+                        <button>삭제</button>
+                        <button>수정</button>
+                    </div>
+                </div>
+                <div>
+                    <img class="comment-image" src="public/default.jpg" alt="">
+                    <div class="user-name">작성자</div>
+                    <div class="created">작성 일자</div>
+                    <div class="content">내용</div>
+                    <div>
+                        <button>삭제</button>
+                        <button>수정</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <aside>
+        <div id="user-info" style="display: none">
+            <div id="profile-image"><img src="public/default.jpg" alt=""></div>
+            <div id="user-name"></div>
+            <div id="user-email"></div>
+            <div id="user-joined"></div>
+        </div>
+        <button id="login-btn" style="margin: 50px 50px;" onclick="openLoginDialog()">로그인하기</button>
+    </aside>
+    <div id="login-container" style="position: fixed; display: none;">
+        <div class="popup-container">
+            <div>
+                <div style="margin: 30px 0 30px 0;">로그인</div>
+                <div><input type="text" id="input-user-id" placeholder="사용자 아이디"></div>
+                <div><input type="password" id="input-user-password" placeholder="패스워드" type="password"></div>
+                <div>
+                    <button onclick="login()">확인</button>
+                    <button onclick="closeLoginDialog()">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="comment-container" style="position: fixed; display: none">
+        <div class="popup-container">
+            <div>
+                <div style="margin: 30px 0 30px 0px;"><input type="file" id="upload-file"></div>
+                <div><input type="text" id="comment-content" placeholder="사진 설명"></div>
+                <div>
+                    <button onclick="addComment()">확인</button>
+                    <button onclick="closeCommentDialog()">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
