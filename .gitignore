@@ -5,7 +5,7 @@ HELP.md
 !gradle/wrapper/gradle-wrapper.jar
 
 ### STS ###
-.apt_generated
+.apt_generatedf
 .classpath
 .factorypath
 .project

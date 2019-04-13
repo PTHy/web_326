@@ -20,6 +20,8 @@ public class Comment {
 
     private Long userId;
     private String content;
+    private String storedPath;
+    private String originName;
 
     @CreationTimestamp
     private LocalDateTime created;
@@ -32,6 +34,8 @@ public class Comment {
         this.content = c.getContent();
         this.created = c.getCreated();
         this.modified = c.getModified();
+        this.storedPath = c.getStoredPath();
+        this.originName = c.getOriginName();
     }
 
     public Comment(Long userId, String content) {

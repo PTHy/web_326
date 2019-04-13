@@ -1,46 +1,57 @@
-let comments = [];
-let users = [];
+let currentUser;
 
 window.onload = () => {
-    getUsers();
     getComments();
+    changeMode();
+};
+
+function changeMode() {
+    if (currentUser) {
+        $('#user-info').show();
+        $('#login-btn').hide();
+    }
+    else {
+        $('#user-info').hide();
+        $('#login-btn').show();
+    }
 }
 
 async function getComments() {
-    console.log("아니 뭐냐고");
     try {
-       comments = await $.get('/comment');
-       this.drawComments();
+        const comments = await $.get('/comment');
+        this.drawComments(comments);
+        console.log(comments);
     } catch (error) {
         console.error(error.message);
     }
 }
 
-function drawComments() {
+function drawComments(comments) {
     comments.map( comment => {
         this.drawComment(comment);
     })
 }
 
 function drawComment(comment) {
+    console.log(comment);
+    let buttonContent= '';
+    if (comment.userId === currentUser) {
+        buttonContent = `<div>
+                            '<button onclick=>삭제</button>
+'                            <button>수정</button>
+                        </div>`
+    }
     $('#comments').append(
         `
-        <div id= "comment${comment.id}" style="display: flex; border-bottom: solid 1px silver">
-            <div style="width: 150px">${comment.username}</div>
-            <div class="content" style="width: 350px;">${comment.content}</div>
-            <div class="modifyContent" style="width: 350px; display: none;"><input class="inputContent" type="text"></div>
-            <div class="modifyMode"><button onclick="deleteComment(${comment.id})">삭제</button></div>
-            <div class="modifyMode"><button onclick="changeModifyMode(${comment.id})">수정</button></div>
-            <div class="modifySubmit" style="display: none;"><button onclick="modifyCommentSubmit(${comment.id})">완료</button></div>
-            <div class="modifySubmit" style="display: none;"><button onclick="cancelModify(${comment.id})">취소</button></div>
-        </div> 
-        `
+        <div>
+            <img class="comment-image" src="${(comment.storedPath === null) ? "/public/default.jpg" :  `/attachment/comment/${comment.id}`}" alt="사진">
+            <div class="user-name">${comment.username}</div>
+            <div class="created">${comment.created}</div>
+            <div class="content">${comment.content}</div>
+            {}
+         </div>
+       `
     )
-}
-
-function cancelModify (id) {
-    clearModifyInput(id);
-    changeGeneralMode(id);
 }
 
 async function modifyCommentSubmit(id) {
@@ -50,91 +61,42 @@ async function modifyCommentSubmit(id) {
         content: $(`#comment${id}`).children('.modifyContent').children('.inputContent').val()
     };
     await $.ajax({
-                url: '/comment',
-                type: 'put',
-                dataType: 'json',
-                contentType: 'application/json',
-                data: JSON.stringify(modifyComment),
-                success: (result) => {
-                    if(result) {
-                        applyModify(id);
-                        clearModifyInput(id);
-                        changeGeneralMode(id);
-                    }
-                }
-            })
-}
-
-function applyModify(id) {
-    $(`#comment${id}`).children('.content').text($(`#comment${id}`).children('.modifyContent').children('.inputContent').val());
-}
-
-function changeModifyMode(id) {
-    $(`#comment${id}`).children('.modifyContent').children('.inputContent').val($(`#comment${id}`).children('.content').text());
-
-    const comment = $(`#comment${id}`);
-    comment.children('.content').hide();
-    comment.children('.modifyMode').hide();
-    comment.children('.modifySubmit').show();
-    comment.children('.modifyContent').show();
-}
-
-function changeGeneralMode(id) {
-    const comment = $(`#comment${id}`);
-    comment.children('.content').show();
-    comment.children('.modifyMode').show();
-    comment.children('.modifySubmit').hide();
-    comment.children('.modifyContent').hide();
+        url: '/comment',
+        type: 'put',
+        dataType: 'json',
+        contentType: 'application/json',
+        data: JSON.stringify(modifyComment),
+        success: (result) => {
+            if(result) {
+                /*
+                구현 필요
+                 */
+            }
+        }
+    })
 }
 
 async function deleteComment(id) {
     try {
         await $.ajax({
-                    url: `comment/${id}`,
-                    type: 'delete',
-                    success : (result) => {
-                        if (result === true)
-                            $(`#comment${id}`).remove();
-                    }
-                });
+            url: `comment/${id}`,
+            type: 'delete',
+            success : (result) => {
+                if (result === true)
+                    $(`#comment${id}`).remove();
+            }
+        });
     } catch (error) {
         console.log(JSON.stringify(error));
     }
 }
 
-async function addComment() {
-    try {
-        let newComment = {
-            userId: 1,
-            content: $('#newComment').val(),
-        };
-
-        await $.ajax({
-                    url: '/comment',
-                    type: 'post',
-                    dataType: 'json',
-                    contentType: 'application/json',
-                    data: JSON.stringify(newComment),
-                    success: (result) => {
-                        clearAddCommentInput();
-                        drawComment(result);
-                    }
-                });
-    } catch (error) {
-        console.log( JSON.stringify(error));
+async function uploadFile() {
+    if(!$('#upload-file')[0].files.length) {
+        alert("파일을 선택해주세요!");
+        return;
     }
-}
-
-function clearAddCommentInput() {
-    $('#newComment').val('');
-}
-
-function clearModifyInput(id) {
-    $(`#comment${id}`).children('.modifyContent').children('.inputContent').val('');
-}
-
-async function uploadFile(id) {
-    const file = $(`#upload-file${id}`)[0].files[0];
+    const file = $('#upload-file')[0].files[0];
     console.log(file);
     const formData = new FormData();
     formData.append("uploadFile", file);
@@ -151,114 +113,118 @@ async function uploadFile(id) {
         $('#upload-file').value = "";
         return response;
     } catch (error) {
-        console.log(JSON.stringify(error));
+        console.log(`[ERROR] uploadFile 오류 ${JSON.stringify(error)}`);
     }
 }
 
-async function addUser() {
-    const username = $('#inputUsername').val();
-    const email = $('#inputEmail').val();
 
-    const data = {
-        username,
-        email
+async function addComment() {
+
+    const uploadFile = await this.uploadFile();
+
+    if (!uploadFile)
+        return;
+
+    const { storedPath, originName } = uploadFile;
+    let newComment = {
+        userId: currentUser,
+        content: $('#comment-content').val(),
+        storedPath,
+        originName,
     };
-    console.log(data);
 
     try {
-        const response = await $.ajax({
-            url: '/user',
+        await $.ajax({
+            url: '/comment',
+            type: 'post',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify(newComment),
+            success: (result) => {
+                alert("글 작성에 성공하였습니다");
+                clearAddCommentInput();
+                drawComment(result);
+            }
+        });
+    } catch (error) {
+        console.log( `[ERROR] 글 작성 실패 ${JSON.stringify(error)}`);
+        alert("글 작성에 실패하였습니다");
+    } finally {
+        closeCommentDialog();
+    }
+}
+
+function clearAddCommentInput() {
+    $('#comment-content').val('');
+}
+
+function clearModifyInput(id) {
+    $(`#comment${id}`).children('.modifyContent').children('.inputContent').val('');
+}
+function openLoginDialog() {
+    if (currentUser) {
+        alert("이미 로그인이 되어 있습니다");
+        return;
+    }
+    $('#login-container').show(400);
+}
+
+function closeLoginDialog() {
+    $('#login-container').hide(1000);
+}
+
+function openCommentDialog() {
+    if (!chkLogin())
+        return;
+    $('#comment-container').show(400);
+}
+
+function closeCommentDialog() {
+    $('#comment-container').hide(1000);
+}
+
+function chkLogin() {
+    if (!currentUser) {
+        alert("로그인이 필요합니다!");
+        return false;
+    }
+    return true;
+}
+
+async function login() {
+    try {
+        const data = {
+            id: $('#input-user-id').val(),
+            password: $('#input-user-password').val()
+        };
+        await $.ajax({
+            url: '/user/login',
             type: 'post',
             dataType: 'json',
             contentType: 'application/json',
             data: JSON.stringify(data),
             success: (result) => {
-                clearAddUserInput();
-                drawUser(result);
-            }
-        });
-    } catch (error) {
-        console.error(error);
-        alert("유저 추가에 실패하였습니다");
-    }
-}
-
-function drawUsers() {
-    users.map( user => {
-        this.drawUser(user);
-    });
-}
-
-function drawUser(user) {
-    $('#users').append(
-        `
-        <div id= "user${user.id}" style="display: flex; border-bottom: solid 1px silver">
-            <div style="width: 150px">${user.id}</div>
-            <div class="username" style="width: 350px;">${user.username}</div>
-            <div class="email" style="width: 350px;">${user.email}</div>
-            <div class="profileImage" style="width: 350px; overflow: hidden; text-overflow: ellipsis">${user.profileImage}</div>
-            <div class="modifyMode"><button onclick="deleteUser(${user.id})">삭제</button></div>
-            <input type="file" id="upload-file${user.id}">
-            <div><button onclick="changeProfilePhoto(${user.id})">프로필 사진 업로드</button></div>
-        </div> 
-        `
-    )
-}
-
-async function deleteUser(id) {
-    try {
-        await $.ajax({
-            url: `user/${id}`,
-            type: 'delete',
-            success : (result) => {
-                if (result === true)
-                    $(`#user${id}`).remove();
-            }
-        });
-    } catch (error) {
-        console.log(JSON.stringify(error));
-    }
-}
-
-async function getUsers() {
-    try {
-        users = await $.get('/user');
-        this.drawUsers();
-    } catch (error) {
-        console.error(error.message);
-    }
-}
-
-
-function clearAddUserInput() {
-    $('#inputUsername').val('');
-    $('#inputEmail').val('');
-}
-
-async function changeProfilePhoto (id) {
-    const response = await uploadFile(id);
-    const data = {
-        id,
-        profileImage: response.storedPath
-    };
-
-    console.log(data);
-
-    try {
-        await $.ajax({
-            url: '/user',
-            type: 'put',
-            dataType: 'json',
-            contentType: 'application/json',
-            data: JSON.stringify(data),
-            success: (result) => {
-                if(result)
-                    alert("프로필 사진 변경에 성공하였습니다");
-                $(`#user${id}`).children('.profileImage').text(result.profileImage);
+                if(result) {
+                    console.log(result);
+                    alert("로그인 성공")
+                    currentUser = result.id;
+                    const imagePath = (result.storedPath === null) ? "/public/default.jpg" :  `/attachment/user/${result.id}`;
+                    $('#profile-image').children('img').attr("src", imagePath);
+                    $('#user-name').text(result.username);
+                    $('#user-email').text(result.email);
+                    $('#user-joined').text(result.joined);
+                    changeMode();
+                } else {
+                    alert("로그인 실패");
+                }
             }
         })
     } catch (error) {
-        console.error(error);
-        alert("프로필 사진 변경에 실패하였습니다");
+        console.log(error);
+        alert("로그인 실패");
+    } finally {
+        closeLoginDialog();
+        $('#input-user-id').val('');
+        $('#input-user-password').val('');
     }
 }

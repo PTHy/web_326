@@ -18,7 +18,10 @@ Content-Type: application/json
 
 {
    "username" : "진우민",
-   "email": "jinsee@dgsw.hs.kr"
+   "email": "jinsee@dgsw.hs.kr",
+   "password": "test",
+  "storedPath": "D:\\Dev\\Spring\\web_326\\src\\main\\java\\kr\\hs\\dgsw\\web_326\\upload\\2019\\04\\0526b52a90-b172-4152-a175-715c2530997c_47014401_504815266676146_8235251953563598848_n.jpg",
+  "originName": "0526b52a90-b172-4152-a175-715c2530997c_47014401_504815266676146_8235251953563598848_n.jpg"
 }
 
 ###
@@ -38,6 +41,16 @@ DELETE http://localhost:8080/user/1
 
 ###
 
+POST http://localhost:8080/user/login
+Content-Type: application/json
+
+{
+  "id": 5,
+  "password": "test"
+}
+
+###
+
 GET http://localhost:8080/comment/
 Accept: application/json
 
@@ -48,7 +61,9 @@ Content-Type: application/json
 
 {
   "userId" : 1,
-  "content" : "안녕하세요"
+  "content" : "안녕하세요",
+  "storedPath": "yeye",
+  "originName": "wtf"
 }
 
 ###
@@ -58,7 +73,7 @@ Content-Type: application/json
 
 {
   "id": 6,
-  "userId" : 5,
+  "userId" : 1,
   "content" : "뭐임마"
 }
 

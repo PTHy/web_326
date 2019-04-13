@@ -28,6 +28,9 @@ public class UserController {
         return this.userService.add(u);
     }
 
+    @PostMapping("/user/login")
+    public User login(@RequestBody User u) { return this.userService.login(u); }
+
     @PutMapping("/user")
     public User update(@RequestBody User u) {
         return this.userService.update(u);

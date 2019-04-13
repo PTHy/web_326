@@ -2,6 +2,7 @@ package kr.hs.dgsw.web_326.Service;
 
 import kr.hs.dgsw.web_326.Domain.Comment;
 import kr.hs.dgsw.web_326.Domain.User;
+import kr.hs.dgsw.web_326.Protocol.AttachmentProtocol;
 import kr.hs.dgsw.web_326.Protocol.CommentUsernameProtocol;
 import kr.hs.dgsw.web_326.Repository.CommentRepository;
 import kr.hs.dgsw.web_326.Repository.UserRepository;
@@ -72,13 +73,16 @@ public class CommentServiceImpl
 //                })
 //                .orElse(
 //                );
+        System.out.println(c);
         Comment nc = this.commentRepository.save(c);
 
         return this.userRepository.findById(nc.getUserId())
                 .map(fu -> {
-                    return new CommentUsernameProtocol(nc, fu.getUsername());
+                    CommentUsernameProtocol cup = new CommentUsernameProtocol(nc, fu.getUsername());
+                    System.out.println(cup);
+                    return cup;
                 })
-                .orElse(new CommentUsernameProtocol(c, null));
+                .orElse(new CommentUsernameProtocol(nc, null));
     }
 
     @Override
@@ -127,5 +131,13 @@ public class CommentServiceImpl
         } catch (Exception e) {
             return false;
         }
+    }
+
+    @Override
+    public AttachmentProtocol getCommentImage(Long id) {
+        Optional<Comment> found = this.commentRepository.findById(id);
+        if(!found.isPresent())
+            return null;
+        return new AttachmentProtocol(found.get().getStoredPath(), found.get().getOriginName());
     }
 }
